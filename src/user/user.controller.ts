@@ -39,25 +39,18 @@ export class UserController {
 
 	@HttpCode(200)
 	@Post('register')
-	async register(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
+	async register(@Body() createUserDto: CreateUserDto, @Res() response: Response) {
 		const user = await this.userService.register(createUserDto);
 		await this.emailConfirmationService.sendVerificationLink(user.email);
-		const { accessToken, refreshToken, refreshTokenCookie } =
+		const { refreshTokenCookie, ...tokens } =
 			await this.authService.getNewAccessAndRefreshTokens(
 				user.id,
 				createUserDto.fingerprint
 			);
 
-		delete user.id;
-		delete user.resetPasswordToken;
-
-		res.setHeader('Set-cookie', refreshTokenCookie);
-		return res.send({
-			accessToken,
-			refreshToken,
-			user,
-			message: 'A confirmation email was sent.',
-		});
+		const res = this.authService.buildResponse(user, tokens);
+		response.setHeader('Set-cookie', refreshTokenCookie);
+		return response.send(res);
 	}
 
 	@HttpCode(200)

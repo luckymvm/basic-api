@@ -19,7 +19,7 @@ export class UserService {
 
 	async register(createUserDto: CreateUserDto) {
 		try {
-			const { password, ...user } = await this.create({
+			const user = await this.create({
 				...createUserDto,
 			});
 

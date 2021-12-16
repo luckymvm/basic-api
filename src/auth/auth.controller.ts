@@ -15,9 +15,10 @@ export class AuthController {
 	async login(@Req() request: RequestWithUserInterface, @Res() response: Response) {
 		const { user } = request;
 		const { fingerprint } = request.body;
-		const { refreshTokenCookie, ...res } =
+		const { refreshTokenCookie, ...tokens } =
 			await this.authService.getNewAccessAndRefreshTokens(user.id, fingerprint);
 
+		const res = this.authService.buildResponse(user, tokens);
 		response.setHeader('Set-cookie', refreshTokenCookie);
 		return response.send(res);
 	}
@@ -49,8 +50,9 @@ export class AuthController {
 	@UseGuards(JwtAuthGuard)
 	@Get()
 	async authenticate(@Req() request: RequestWithUserInterface) {
-		delete request.user.id;
-		delete request.user.resetPasswordToken;
-		return request.user;
+		return {
+			username: request.user.username,
+			email: request.user.email,
+		};
 	}
 }

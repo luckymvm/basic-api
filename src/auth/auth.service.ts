@@ -44,6 +44,15 @@ export class AuthService {
 		return 'refreshToken=; HttpOnly; Path=/; Max-Age=0';
 	}
 
+	buildResponse(user: UserEntity, tokens: object) {
+		return {
+			...tokens,
+			username: user.username,
+			email: user.email,
+			isEmailConfirmed: user.isEmailConfirmed,
+		};
+	}
+
 	async getNewAccessAndRefreshTokens(userId: number, fingerprint: string) {
 		if (!fingerprint) throw new BadRequestException('Fingerprint not provided');
 		await this.tokensService.deleteTokenByCond({ fingerprint });
