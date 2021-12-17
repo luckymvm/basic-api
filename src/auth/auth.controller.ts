@@ -4,10 +4,14 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { RequestWithUserInterface } from './interfaces/requestWithUser.interface';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { TokensService } from '../tokens/tokens.service';
 
 @Controller('auth')
 export class AuthController {
-	constructor(private readonly authService: AuthService) {}
+	constructor(
+		private readonly authService: AuthService,
+		private readonly tokensService: TokensService
+	) {}
 
 	@HttpCode(200)
 	@UseGuards(LocalAuthGuard)
@@ -16,7 +20,7 @@ export class AuthController {
 		const { user } = request;
 		const { fingerprint } = request.body;
 		const { refreshTokenCookie, ...tokens } =
-			await this.authService.getNewAccessAndRefreshTokens(user.id, fingerprint);
+			await this.tokensService.getNewAccessAndRefreshTokens(user.id, fingerprint);
 
 		const res = this.authService.buildResponse(user, tokens);
 		response.setHeader('Set-cookie', refreshTokenCookie);
@@ -28,7 +32,7 @@ export class AuthController {
 	async refreshTokens(@Req() req: Request, @Res() res: Response) {
 		const refToken = req?.cookies?.refreshToken ?? req?.body?.refreshToken; // 2nd param for requests from a mobile app
 		const fingerprint = req?.body?.fingerprint;
-		const newTokens = await this.authService.updateAccessAndRefreshTokens(
+		const newTokens = await this.tokensService.updateAccessAndRefreshTokens(
 			refToken,
 			fingerprint
 		);

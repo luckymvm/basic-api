@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TokensEntity } from './tokens.entity';
@@ -6,13 +6,16 @@ import { TokenDataDto } from './dto/tokenData.dto';
 import ms from '../ms';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
+import { TokenPayloadInterface } from './interfaces/tokenPayload.interface';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class TokensService {
 	constructor(
 		@InjectRepository(TokensEntity)
 		private readonly tokensRepo: Repository<TokensEntity>,
-		private readonly configService: ConfigService
+		private readonly configService: ConfigService,
+		private readonly jwtService: JwtService
 	) {}
 
 	async findByCond(cond: object): Promise<TokensEntity> {
@@ -33,6 +36,68 @@ export class TokensService {
 		return await this.tokensRepo.delete(cond);
 	}
 
+	async getNewAccessAndRefreshTokens(userId: number, fingerprint: string) {
+		if (!fingerprint) throw new BadRequestException('Fingerprint not provided');
+		await this.deleteTokenByCond({ fingerprint });
+
+		const { inSeconds, inMilliseconds } = this.newRefTokenExpireTimes();
+		const newRefreshSession = await this.generateNewRefreshSession(
+			userId,
+			fingerprint,
+			inMilliseconds
+		);
+
+		const accessToken = await this.generateAccessToken(userId);
+		const refreshTokenCookie = this.generateCookieWithRefreshToken(
+			newRefreshSession.refreshToken,
+			inSeconds
+		);
+
+		return {
+			accessToken,
+			refreshTokenCookie,
+			refreshToken: newRefreshSession.refreshToken,
+		};
+	}
+
+	async updateAccessAndRefreshTokens(refreshToken: string, fingerprint: string) {
+		if (!refreshToken || !fingerprint) {
+			throw new BadRequestException('Refresh token or fingerprint not provided');
+		}
+
+		const tokenFromDB = await this.findByCond({ refreshToken });
+
+		await this.verifyRefreshSessions(tokenFromDB, fingerprint);
+		await this.deleteTokenByCond({ refreshToken });
+		const expireTimes = this.newRefTokenExpireTimes();
+
+		const newRefreshSession = await this.generateNewRefreshSession(
+			tokenFromDB.userId,
+			fingerprint,
+			expireTimes.inMilliseconds
+		);
+
+		const accessToken = await this.generateAccessToken(tokenFromDB.userId);
+		const refreshTokenCookie = this.generateCookieWithRefreshToken(
+			newRefreshSession.refreshToken,
+			expireTimes.inSeconds
+		);
+
+		return {
+			accessToken,
+			refreshTokenCookie,
+			refreshToken: newRefreshSession.refreshToken,
+		};
+	}
+
+	async generateAccessToken(id: number) {
+		const payload: TokenPayloadInterface = { sub: id };
+		return this.jwtService.signAsync(payload);
+	}
+
+	generateCookieWithRefreshToken(refreshToken: string, maxAge: number) {
+		return `refreshToken=${refreshToken}; HttpOnly; Path=/auth; Max-Age=${maxAge}`;
+	}
 	async generateNewRefreshSession(
 		userId: number,
 		fingerprint: string,

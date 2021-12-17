@@ -26,6 +26,7 @@ import { ChangeEmailService } from './services/change-email.service';
 import { ChangeEmailDto } from './dtos/change-email.dto';
 import { EmailConfirmationGuard } from './guards/email-confirmation.guard';
 import { ConfirmEmailChangeDto } from './dtos/confirm-email-change.dto';
+import { TokensService } from '../tokens/tokens.service';
 
 @Controller('user')
 export class UserController {
@@ -34,7 +35,8 @@ export class UserController {
 		private readonly emailConfirmationService: EmailConfirmationService,
 		private readonly resetPasswordService: ResetPasswordService,
 		private readonly changeEmailService: ChangeEmailService,
-		private readonly authService: AuthService
+		private readonly authService: AuthService,
+		private readonly tokensService: TokensService
 	) {}
 
 	@HttpCode(200)
@@ -43,7 +45,7 @@ export class UserController {
 		const user = await this.userService.register(createUserDto);
 		await this.emailConfirmationService.sendVerificationLink(user.email);
 		const { refreshTokenCookie, ...tokens } =
-			await this.authService.getNewAccessAndRefreshTokens(
+			await this.tokensService.getNewAccessAndRefreshTokens(
 				user.id,
 				createUserDto.fingerprint
 			);

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './user.entity';
 import { Repository } from 'typeorm';
@@ -19,11 +19,7 @@ export class UserService {
 
 	async register(createUserDto: CreateUserDto) {
 		try {
-			const user = await this.create({
-				...createUserDto,
-			});
-
-			return user;
+			return this.create(createUserDto);
 		} catch (e) {
 			throw new BadRequestException('Username or email are taken');
 		}
