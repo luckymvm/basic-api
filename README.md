@@ -1,4 +1,4 @@
-### Endpoints:
+## Endpoints:
 
 **/user**
 
@@ -26,7 +26,7 @@ Path | Method | Description
 /auth | GET | Auth & get current user info
 
 
-#### Register account
+### Register account
 
 ***Request***
 ```
