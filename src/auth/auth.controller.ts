@@ -1,7 +1,7 @@
 import { Controller, HttpCode, Post, Req, Res, Get, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { RequestWithUserInterface } from './interfaces/requestWithUser.interface';
+import { RequestWithUserInterface } from './interfaces/request-with-user.interface';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { TokensService } from '../tokens/tokens.service';

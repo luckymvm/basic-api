@@ -5,7 +5,7 @@ import {
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common';
-import { RequestWithUserInterface } from '../../auth/interfaces/requestWithUser.interface';
+import { RequestWithUserInterface } from '../../auth/interfaces/request-with-user.interface';
 
 @Injectable()
 export class EmailConfirmationGuard implements CanActivate {
