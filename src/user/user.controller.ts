@@ -17,7 +17,7 @@ import { SendLinkDto } from './dtos/send-reset-password-link.dto';
 import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { ResetPasswordService } from './services/reset-password.service';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { UserService } from './user.service';
+import { UserService } from './services/user.service';
 import { AuthService } from '../auth/auth.service';
 import { Response } from 'express';
 import { ChangePasswordDto } from './dtos/change-password.dto';

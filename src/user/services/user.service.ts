@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from './user.entity';
+import { UserEntity } from '../user.entity';
 import { Repository } from 'typeorm';
-import { UserDataDto } from './dtos/user-data.dto';
-import { CreateUserDto } from './dtos/create-user.dto';
-import { ChangePasswordDto } from './dtos/change-password.dto';
+import { UserDataDto } from '../dtos/user-data.dto';
+import { CreateUserDto } from '../dtos/create-user.dto';
+import { ChangePasswordDto } from '../dtos/change-password.dto';
 import { compare, hash } from 'bcrypt';
-import { ChangeAliasDto } from './dtos/change-alias.dto';
-import { TokensService } from '../tokens/tokens.service';
+import { ChangeAliasDto } from '../dtos/change-alias.dto';
+import { TokensService } from '../../tokens/tokens.service';
 
 @Injectable()
 export class UserService {

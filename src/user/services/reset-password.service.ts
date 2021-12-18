@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from '../../email/email.service';
 import { ResetPasswordTokenPayload } from '../interfaces/reset-password-token-payload.interface';
-import { UserService } from '../user.service';
+import { UserService } from './user.service';
 import { ResetPasswordDto } from '../dtos/reset-password.dto';
 import { TokensService } from '../../tokens/tokens.service';
 import { hash } from 'bcrypt';

@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { EmailService } from '../../email/email.service';
 import { VerificationTokenPayload } from '../interfaces/verification-token-payload.interface';
-import { UserService } from '../user.service';
+import { UserService } from './user.service';
 
 @Injectable()
 export class EmailConfirmationService {

@@ -1,9 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/services/user.service';
 import { LoginDto } from './dto/login.dto';
 import { isEmail } from 'class-validator';
 import { UserEntity } from '../user/user.entity';
-import { JwtService } from '@nestjs/jwt';
 import { TokensService } from '../tokens/tokens.service';
 
 @Injectable()

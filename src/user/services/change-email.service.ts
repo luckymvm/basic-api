@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ChangeEmailDto } from '../dtos/change-email.dto';
-import { UserService } from '../user.service';
+import { UserService } from './user.service';
 import { UserEntity } from '../user.entity';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
