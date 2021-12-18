@@ -43,7 +43,7 @@ POST /user/register
 - The request goes through a ValidationPipe (data validation and transformation)
 - Save the user to the database
 - If a user with such an email and username exists, then we throw an 400 BadRequestException error
-- If everything went well, we generate new access token and the refresh token, then we return the 200 code on the successful registration of the user
+- If everything went well, we generate new access token and refresh token, then we return the 200 code on the successful registration of the user
 - A link is sent to an email to confirm the registration of an account
 
 ***Response***
