@@ -44,13 +44,12 @@ export class UserController {
 	async register(@Body() createUserDto: CreateUserDto, @Res() response: Response) {
 		const user = await this.userService.register(createUserDto);
 		await this.emailConfirmationService.sendVerificationLink(user.email);
-		const { refreshTokenCookie, ...tokens } =
-			await this.tokensService.getNewAccessAndRefreshTokens(
-				user.id,
-				createUserDto.fingerprint
-			);
+		const tokens = await this.tokensService.getNewAccessAndRefreshTokens(
+			user.id,
+			createUserDto.fingerprint
+		);
 
-		const res = this.authService.buildResponse(user, tokens);
+		const { res, refreshTokenCookie } = this.authService.buildResponse(user, tokens);
 		response.setHeader('Set-cookie', refreshTokenCookie);
 		return response.send(res);
 	}

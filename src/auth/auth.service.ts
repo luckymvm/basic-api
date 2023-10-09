@@ -30,12 +30,24 @@ export class AuthService {
 		return 'refreshToken=; HttpOnly; Path=/; Max-Age=0';
 	}
 
-	buildResponse(user: UserEntity, tokens: object) {
+	buildResponse(
+		user: UserEntity,
+		tokens: { refreshToken: string; expiresIn: number; accessToken: string }
+	) {
+		const refreshTokenCookie = this.tokensService.generateCookieWithRefreshToken(
+			tokens.refreshToken,
+			tokens.expiresIn
+		);
+
 		return {
-			...tokens,
-			username: user.username,
-			email: user.email,
-			isEmailConfirmed: user.isEmailConfirmed,
+			res: {
+				accessToken: tokens.accessToken,
+				refreshToken: tokens.refreshToken,
+				username: user.username,
+				email: user.email,
+				isEmailConfirmed: user.isEmailConfirmed,
+			},
+			refreshTokenCookie,
 		};
 	}
 }

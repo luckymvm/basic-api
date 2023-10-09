@@ -55,8 +55,8 @@ export class TokensService {
 
 		return {
 			accessToken,
-			refreshTokenCookie,
 			refreshToken: newRefreshSession.refreshToken,
+			expiresIn: inSeconds,
 		};
 	}
 
@@ -67,7 +67,7 @@ export class TokensService {
 
 		const tokenFromDB = await this.findByCond({ refreshToken });
 
-		await this.verifyRefreshSessions(tokenFromDB, fingerprint);
+		await this.verifyRefreshSession(tokenFromDB, fingerprint);
 		await this.deleteTokenByCond({ refreshToken });
 		const expireTimes = this.newRefTokenExpireTimes();
 
@@ -78,15 +78,11 @@ export class TokensService {
 		);
 
 		const accessToken = await this.generateAccessToken(tokenFromDB.userId);
-		const refreshTokenCookie = this.generateCookieWithRefreshToken(
-			newRefreshSession.refreshToken,
-			expireTimes.inSeconds
-		);
 
 		return {
 			accessToken,
-			refreshTokenCookie,
 			refreshToken: newRefreshSession.refreshToken,
+			expiresIn: expireTimes.inSeconds,
 		};
 	}
 
@@ -98,6 +94,7 @@ export class TokensService {
 	generateCookieWithRefreshToken(refreshToken: string, maxAge: number) {
 		return `refreshToken=${refreshToken}; HttpOnly; Path=/auth; Max-Age=${maxAge}`;
 	}
+
 	async generateNewRefreshSession(
 		userId: number,
 		fingerprint: string,
@@ -115,23 +112,23 @@ export class TokensService {
 		return await this.saveToken(newRefreshSession);
 	}
 
-	async verifyRefreshSessions(oldRefreshSession: TokensEntity, fingerprint: string) {
+	async verifyRefreshSession(refreshSession: TokensEntity, fingerprint: string) {
 		const nowTime = new Date().getTime();
 
-		if (!oldRefreshSession) {
+		if (!refreshSession) {
 			throw new UnauthorizedException('Invalid session');
 		}
 
-		if (nowTime > oldRefreshSession.expiresIn) {
+		if (nowTime > refreshSession.expiresIn) {
 			await this.deleteTokenByCond({
-				refreshToken: oldRefreshSession.refreshToken,
+				refreshToken: refreshSession.refreshToken,
 			});
 			throw new UnauthorizedException('Session expired');
 		}
 
-		if (oldRefreshSession.fingerprint != fingerprint) {
+		if (refreshSession.fingerprint != fingerprint) {
 			await this.deleteTokenByCond({
-				refreshToken: oldRefreshSession.refreshToken,
+				refreshToken: refreshSession.refreshToken,
 			});
 			throw new UnauthorizedException('Invalid session. Wrong fingerprint.');
 		}

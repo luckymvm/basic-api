@@ -19,10 +19,12 @@ export class AuthController {
 	async login(@Req() request: RequestWithUserInterface, @Res() response: Response) {
 		const { user } = request;
 		const { fingerprint } = request.body;
-		const { refreshTokenCookie, ...tokens } =
-			await this.tokensService.getNewAccessAndRefreshTokens(user.id, fingerprint);
+		const tokens = await this.tokensService.getNewAccessAndRefreshTokens(
+			user.id,
+			fingerprint
+		);
 
-		const res = this.authService.buildResponse(user, tokens);
+		const { res, refreshTokenCookie } = this.authService.buildResponse(user, tokens);
 		response.setHeader('Set-cookie', refreshTokenCookie);
 		return response.send(res);
 	}
@@ -30,16 +32,17 @@ export class AuthController {
 	@HttpCode(200)
 	@Post('refresh')
 	async refreshTokens(@Req() req: Request, @Res() res: Response) {
-		const refToken = req?.cookies?.refreshToken ?? req?.body?.refreshToken; // 2nd param for requests from a mobile app
+		const refToken = req.cookies?.refreshToken ?? req.body?.refreshToken; // 2nd param for requests from a mobile app
 		const fingerprint = req?.body?.fingerprint;
-		const newTokens = await this.tokensService.updateAccessAndRefreshTokens(
-			refToken,
-			fingerprint
+		const { expiresIn, ...tokens } =
+			await this.tokensService.updateAccessAndRefreshTokens(refToken, fingerprint);
+		const refreshTokenCookie = this.tokensService.generateCookieWithRefreshToken(
+			tokens.refreshToken,
+			expiresIn
 		);
 
-		res.setHeader('Set-cookie', newTokens.refreshTokenCookie);
-		delete newTokens.refreshTokenCookie;
-		return res.send(newTokens);
+		res.setHeader('Set-cookie', refreshTokenCookie);
+		return res.send({ ...tokens });
 	}
 
 	@UseGuards(JwtAuthGuard)
