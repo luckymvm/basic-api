@@ -19,7 +19,7 @@ export class UserService {
 
 	async register(createUserDto: CreateUserDto) {
 		try {
-			return this.create(createUserDto);
+			return await this.create(createUserDto);
 		} catch (e) {
 			throw new BadRequestException('Username or email are taken');
 		}

@@ -20,11 +20,15 @@ export class EmailConfirmationService {
 		const url = `${baseUrl}/confirm-email?token=${token}`;
 		const text = `Hi, please confirm your E-mail address: ${url}`;
 
-		return this.emailService.sendMail({
-			to: email,
-			subject: 'Confirm E-mail address',
-			text,
-		});
+		try {
+			return await this.emailService.sendMail({
+				to: email,
+				subject: 'Confirm E-mail address',
+				text,
+			});
+		} catch (e) {
+			return 'cannot send an email';
+		}
 	}
 
 	async sendEmailChangeVerifLink(newEmail: string, email: string) {
